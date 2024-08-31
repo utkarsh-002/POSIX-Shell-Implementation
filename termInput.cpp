@@ -1,0 +1,137 @@
+#include <termios.h>
+#include <unistd.h>
+#include <bits/stdc++.h>
+#include <iostream>
+#include <dirent.h>
+
+using namespace std;
+
+string cmdList[] = {"ls", "echo", "cat", "search", "history", "cd", "pwd", "pinfo", "exit"};
+vector<string> files;
+vector<string> matches;
+
+//Search function for auto complete
+void autoComplete(string& input) {
+    for (int i=0;i<10;i++) {
+        if (cmdList[i].find(input) == 0)
+            matches.push_back(cmdList[i]);
+    }
+
+    for (int i=0;i<files.size();i++) {
+        if (files[i].find(input) == 0)
+            matches.push_back(files[i]);
+    }
+}
+
+//Function to read input character-by-character
+void termInput(string outResult) {
+    struct termios oggProp, modProp;
+    queue<string> token;
+    struct dirent* dirStruct;
+    DIR* dptr;
+    char c;
+    string temp;
+    int esc,brace,inLen;
+    esc=brace=inLen=0;
+
+    //Set history idx to last element in history vector at start of input
+    upIdx = hisVec.size()-1;
+    
+    //reading files and directories in current directory
+    dptr = opendir(".");
+    // dirStruct = readdir(dptr);
+    while((dirStruct = readdir(dptr))!=nullptr){
+        if (string(dirStruct->d_name) == "." || string(dirStruct->d_name) == "..")
+            continue;
+        if(find(files.begin(),files.end(),string(dirStruct->d_name))==files.end())
+            files.push_back(dirStruct->d_name);
+    }
+    closedir(dptr);
+
+    inResult = "";
+    tcgetattr(0, &oggProp);
+    modProp = oggProp;
+
+    modProp.c_lflag &= ~(ICANON | ECHO);
+    modProp.c_cc[VMIN] = 1;
+    modProp.c_cc[VTIME] = 0;
+    tcsetattr(0, TCSANOW, &modProp);
+    
+    while (read(0, &c, 1) > 0 && c != '\n') {
+        //Implement backspace
+        if(c==127 && inLen>0){
+            write(1,"\b \b",3);
+            if(temp.size()>0)
+                temp.pop_back();
+            else
+                inResult.pop_back();
+            inLen--;
+            continue;
+        }
+
+        //Implement up arrow for history
+        if(c==27){
+            esc = !esc;
+            continue;
+        }else if(c=='['){
+            brace = !brace;
+            continue;
+        }else if(c=='A' && esc==1 && brace==1){
+            upArrow(hisVec,inputLen,upIdx);
+            esc=brace=0;
+            continue;
+        }
+
+        if(c =='\t'){
+            matches.clear();
+            autoComplete(temp);
+            if(matches.size()==1){
+                write(1,"\r",1);
+                write(1,outResult.c_str(),outResult.size());
+                inResult+=matches[0];
+                write(1,&inResult,inResult.length());
+                temp="";
+            }else if(matches.size()>1){
+                write(1,"\n",1);
+                for(int i=0;i<matches.size();i++){
+                    write(1,&matches[i],matches[i].length());
+                    write(1," | ",3);
+                }
+                write(1,": ",1);
+                int n;
+                cin>>n;
+                write(1,&n,1);
+                write(1,"\n",1);
+                inResult+=matches[n-1];
+                temp="";
+                write(1,outResult.c_str(),outResult.size());
+                write(1,&inResult,inResult.length());
+            }
+        }else if(c>=32 && c<=126){
+            if(c == ' ' || c==';'){
+                temp+=c;
+                inResult+=temp;
+                temp="";
+            }else
+                temp+=c;
+            write(1,&c,1);
+            inLen++;
+        }
+    }
+    inResult+=temp;
+    inputLen = inLen;
+    tcsetattr(0, TCSANOW, &oggProp);
+    if(hisVec.size()<20)
+        hisVec.push_back(inResult);
+    else{
+        hisVec.erase(hisVec.begin());
+        hisVec.push_back(inResult);
+    }
+
+
+}
+
+// int main(){
+//     termInput();
+//     return 0;
+// }

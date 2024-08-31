@@ -1,0 +1,10 @@
+cd main.dSYM
+cd Contents
+cd Resources
+cd ~
+cd -
+seearch main
+search main
+history 3
+history 10
+exit
