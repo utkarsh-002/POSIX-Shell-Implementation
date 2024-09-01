@@ -1,10 +1,11 @@
+ls
 cd main.dSYM
-cd Contents
+cd main.dSYM
 cd Resources
-cd ~
-cd -
-seearch main
-search main
-history 3
-history 10
+cd Contents
+ls
+cd Resources
+ls
+cd ..
+cd ..
 exit

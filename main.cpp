@@ -12,8 +12,10 @@ string inResult;
 stack<string> fileList;
 vector<string> echoStr;
 vector<string> hisVec;
-string hisPath;
+string histPath;
 int upIdx,inputLen;
+int nextFlag=0;
+int printFlag =1;
 
 #include "creTokens.cpp"
 #include "printHistory.cpp"
@@ -50,9 +52,12 @@ int main(int argc,char* argv[]){
     string curDirPath="~";
     string prevDir="~";
     string outResult = prompt+curDirPath+">";
+    string absPath = prompt +  homeDir +">";
+    // nextFlag=0;
+    // printFlag=1;
 
-    hisPath = string(homeDir) + "/history.txt";
-    ifstream history(hisPath);
+    histPath = string(homeDir) + "/history.txt";
+    ifstream history(histPath);
     if(history.is_open()){
         string line;
         while (getline(history, line)) { 
@@ -66,20 +71,24 @@ int main(int argc,char* argv[]){
     while(status){
 
         if(cmdToks.empty()){
-            write(1,outResult.c_str(),outResult.size());
+            if(nextFlag)    write(1,"\n",1);
+            nextFlag = 1;
+            if(printFlag)  write(1,outResult.c_str(),outResult.size());
+            printFlag=1;
             termInput(outResult);
             strcpy(input,inResult.c_str());
             strcpy(tempChar,input);
             cmdToks = CreTokens(input);
         }
-
         // while(!cmdToks.empty()){
         //     cout<<"\n"<<cmdToks.front();
         //     cmdToks.pop();
         // }
 
+        if(cmdToks.empty()) continue;
+        
         if(cmdToks.front()=="exit" || cmdToks.front()=="4"){
-            ofstream history(hisPath);
+            ofstream history(histPath);
             for(int i=0;i<hisVec.size();i++){
                 history<<hisVec[i]<<"\n";
             }
@@ -90,10 +99,14 @@ int main(int argc,char* argv[]){
         if(cmdToks.front()=="cd"){
             string strDir = homeDir;
             string dirPath = changeDir(cmdToks,curDirPath,strDir);
-            // write(1,homeDir,strlen(homeDir));
+            
+            if(curDirPath==dirPath) continue;
+
             if(dirPath == "Home"){
-                // write(1,strDir.c_str(),strDir.size());
-                outResult=prompt +  strDir +">";
+                write(1,"\n",1);
+                write(1,absPath.c_str(),absPath.size());
+                printFlag = 0;
+                nextFlag=0;
             }else if(dirPath=="prev"){
                 string str = prevDir;
                 str.erase(str.find('~'),1);
@@ -113,8 +126,9 @@ int main(int argc,char* argv[]){
                 curDirPath = dirPath;
                 outResult= prompt +  curDirPath +">";
             }
-            cout<<"\n";
-        }else if(cmdToks.front() == "echo"){
+        }
+        
+        else if(cmdToks.front() == "echo"){
             // write(1,tempChar,strlen(tempChar));
             string echoRes = echoFun(cmdToks,tempChar);
             write(1,"\n",1);
@@ -137,7 +151,7 @@ int main(int argc,char* argv[]){
                 cmdToks.pop();
             if(!cmdToks.empty())    cmdToks.pop();
             // write(1,err1.c_str(),err1.size());
-            cout<<"\n"<<err1<<"\n";
+            cout<<"\n"<<err1;
         }
     }
     return 0;

@@ -14,6 +14,8 @@
 
 using namespace std;
 
+extern int nextFlag;
+
 void listDetails(const string name,const struct stat detail) {
     struct passwd *pwd = getpwuid(detail.st_uid);
     struct group  *grp = getgrgid(detail.st_gid);
@@ -47,6 +49,7 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
     DIR *dptr = opendir(path.c_str());
     if (dptr == nullptr) {
         perror("opendir");
+        nextFlag=0;
         return;
     }
 
@@ -58,6 +61,7 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
 
         string fullPath = path + "/" + entry->d_name;
         struct stat fileDetail;
+        nextFlag=0;
         if (stat(fullPath.c_str(), &fileDetail) < 0) {
             perror("stat");
             continue;
@@ -109,20 +113,23 @@ void listContents(queue<string>& tokens,string homeDir){
             iterateDocs(".",1,0);
         else if(flags[0]=="-l")
             iterateDocs(".",0,1);
-        else if(flags[0]=="-al" || flags[0]=="la")
+        else if(flags[0]=="-al" || flags[0]=="-la")
             iterateDocs(".",1,1);
         else{
             if(flags[0][0]!='-'){
                 string path = string(currDir) + "/" + flags[0];
                 iterateDocs(path,0,0);
             }else{
-                cout<<"\nInvalid Directory/File_name!!";
+                cout<<"Invalid Directory/File_name!!\n";
+                nextFlag=0;
             }
         }
     }else if(flags.size()==2){
         if((flags[0]=="-l" && flags[0]=="-a") || (flags[0]=="-a" && flags[0]=="-l"))
             iterateDocs(".",1,1);
-    }else
-        cout<<"Too many arguments!!";
+    }else{
+        cout<<"Too many arguments!!\n";
+        nextFlag=0;
+    }
     
 }

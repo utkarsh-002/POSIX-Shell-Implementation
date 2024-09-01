@@ -42,14 +42,14 @@ void searchItem(queue<string>& tokens,string currDirPath){
         if(!tokens.empty())
             tokens.pop();
     }else{
-        cout<<"\nInvalid arguments!!\n";
+        cout<<"\nInvalid arguments!!";
         return;
     }
     
     dptr = opendir(currDir.c_str());
     
     if(searchFun(dptr,name,childDir)){
-            cout<<"\nTrue\n";
+            write(1,"\nTrue",5);
             closedir(dptr);
             chdir(currDirPath.c_str());
             return;
@@ -63,7 +63,7 @@ void searchItem(queue<string>& tokens,string currDirPath){
         dptr = opendir(currDir.c_str());
         childDir--;
         if(searchFun(dptr,name,childDir)){
-            cout<<"\nTrue\n";
+            write(1,"\nTrue",5);
             closedir(dptr);
             chdir(currDirPath.c_str());
             return;
@@ -83,5 +83,5 @@ void searchItem(queue<string>& tokens,string currDirPath){
     //             dir.push(dirStruct->d_name);
     //     }
     // }
-    cout<<"\nFalse\n";
+    write(1,"\nFalse",6);
 }

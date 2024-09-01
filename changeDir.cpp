@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 using namespace std;
-
+extern int nextFlag;
 // bool errorHandler(queue<string>& tokens){
 //     bool flag;
 //     if(!tokens.empty() && tokens.front()==";"){
@@ -29,10 +29,14 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
     while(!cmdTokens.empty() && cmdTokens.front()!=";"){
         temp = cmdTokens.front();
         cmdTokens.pop();
-        if(temp==".") return curDirPath;
+        if(temp=="."){
+            cmdTokens.pop();
+            return curDirPath;
+        }
         if(temp == ".."){
             if(chdir("..")<0){
                 perror("\ncd");
+                nextFlag=0;
             }else{
                     if(curDirPath == "~"){
                         cmdTokens.pop();
@@ -49,8 +53,10 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
             cmdTokens.pop();
             return "prev";
         }else if(temp == "~"){
-            if(chdir(homeDir.c_str())<0)
+            if(chdir(homeDir.c_str())<0){
                 perror("\ncd");
+                nextFlag=0;
+            }
             else{
                 cmdTokens.pop();
                 return "~";
@@ -62,6 +68,7 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
             // write(1,path.c_str(),path.size());
             if(chdir(path.c_str())<0){
                 perror("\ncd");
+                nextFlag=0;
             }
             else{
                 cmdTokens.pop();

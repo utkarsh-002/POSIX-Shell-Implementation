@@ -7,15 +7,21 @@ using namespace std;
 
 int hisIdx;
 
-void upArrow(vector<string> history,int& inputLen,int& upIdx){
+void upArrow(vector<string> history,int& inputLen,int& upIdx,string& inResult,string outResult){
     int strLen = inputLen;
+    string clr = "\033[2K\033[0G";
     if(upIdx !=0){
-        while(strLen>0){
-            write(1,"\b \b",3);
-            strLen--;
-        }
+        // while(strLen>0){
+        //     write(1,"\b \b",3);
+        //     strLen--;
+        // }
+
+        //delete whole line and move pointer to beginning
+        write(1,clr.c_str(),clr.size());
+        write(1,outResult.c_str(),outResult.size());
         inputLen = history[upIdx].size();
         write(1,history[upIdx].c_str(),inputLen);
+        inResult = history[upIdx];
         upIdx--;
     }
 
@@ -33,7 +39,6 @@ void historyList(queue<string>& tokens,vector<string> hisVec){
         return;
        }
     }
-    cout<<num;
 
     if(!tokens.empty() && tokens.front()!=";"){
         cout<<"Too many arguments!!\n";

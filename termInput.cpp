@@ -3,13 +3,17 @@
 #include <bits/stdc++.h>
 #include <iostream>
 #include <dirent.h>
+#include "printHistory.cpp"
 
 using namespace std;
 
 string cmdList[] = {"ls", "echo", "cat", "search", "history", "cd", "pwd", "pinfo", "exit"};
 vector<string> files;
 vector<string> matches;
-
+extern int upIdx;
+extern vector<string> hisVec;
+extern string inResult;
+extern int inputLen;
 //Search function for auto complete
 void autoComplete(string& input) {
     for (int i=0;i<10;i++) {
@@ -77,7 +81,8 @@ void termInput(string outResult) {
             brace = !brace;
             continue;
         }else if(c=='A' && esc==1 && brace==1){
-            upArrow(hisVec,inputLen,upIdx);
+            upArrow(hisVec,inputLen,upIdx,inResult,outResult);
+            inLen=inputLen;
             esc=brace=0;
             continue;
         }
@@ -119,13 +124,18 @@ void termInput(string outResult) {
         }
     }
     inResult+=temp;
-    inputLen = inLen;
+    if(inLen>0)
+        inputLen = inLen;
     tcsetattr(0, TCSANOW, &oggProp);
-    if(hisVec.size()<20)
-        hisVec.push_back(inResult);
-    else{
-        hisVec.erase(hisVec.begin());
-        hisVec.push_back(inResult);
+
+    //updating history
+    if(inResult.size()>0){
+        if(hisVec.size()<20)
+            hisVec.push_back(inResult);
+        else if(inResult.size()>0){
+            hisVec.erase(hisVec.begin());
+            hisVec.push_back(inResult);
+        }
     }
 
 
