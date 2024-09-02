@@ -1,11 +1,20 @@
+mkdir backup
+mv data.txt backup/
+cp config.conf backup/
+rm old_log.txt
+find . -name "*.sh"
+grep "error" logfile.log
+wc -l < data.csv
+cat notes.txt
+du -h
+date
+pwd
+curl -O https://example.com/file.txt
+top
+head -n 10 filename.txt
+tail -n 10 filename.txt
+chmod +x script.sh
+echo "Hello, World!" > hello.txt
+tar -cvf backup.tar backup/
 ls
-cd main.dSYM
-cd main.dSYM
-cd Resources
-cd Contents
-ls
-cd Resources
-ls
-cd ..
-cd ..
 exit

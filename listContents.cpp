@@ -49,7 +49,6 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
     DIR *dptr = opendir(path.c_str());
     if (dptr == nullptr) {
         perror("opendir");
-        nextFlag=0;
         return;
     }
 
@@ -61,7 +60,6 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
 
         string fullPath = path + "/" + entry->d_name;
         struct stat fileDetail;
-        nextFlag=0;
         if (stat(fullPath.c_str(), &fileDetail) < 0) {
             perror("stat");
             continue;
@@ -78,58 +76,84 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
 
 void listContents(queue<string>& tokens,string homeDir){
     vector<string> flags;
-    string tempStr;
+    vector<string> dirPath;
+    string tempStr,path;
     tokens.pop();
-    while(!tokens.empty() && tokens.front()!=";"){
-        if(tokens.front()!="-"){
-            tempStr+=tokens.front();
-        }else{
-            if(tempStr.size()>0){
-                flags.push_back(tempStr);
-                tempStr.clear();
-            }
-            tempStr = tokens.front();
-        }
-        tokens.pop();
-    }
-    if(tempStr.size()>0)
-        flags.push_back(tempStr);
-    if(!tokens.empty()) 
-        tokens.pop();
-
     char currDir[PATH_MAX];
     getcwd(currDir,sizeof(currDir));
+    
+    while(!tokens.empty() && tokens.front()!=";"){
+        if(tokens.front().find("-")!=string::npos){
+            flags.push_back(tokens.front());
+        }else{
+            dirPath.push_back(tokens.front());
+        }
+        tokens.pop();
+    }
 
-    if(flags.size()==0){
-        iterateDocs(".",0,0);
-    }else if(flags.size()==1){
-        if(flags[0]==".")
-            iterateDocs(".",0,0);
-        else if(flags[0]=="..")
-            iterateDocs("..",0,0);
-        else if(flags[0]=="~")
-            iterateDocs(homeDir,0,0);
-        else if(flags[0]=="-a")
-            iterateDocs(".",1,0);
-        else if(flags[0]=="-l")
-            iterateDocs(".",0,1);
-        else if(flags[0]=="-al" || flags[0]=="-la")
-            iterateDocs(".",1,1);
-        else{
-            if(flags[0][0]!='-'){
-                string path = string(currDir) + "/" + flags[0];
-                iterateDocs(path,0,0);
-            }else{
-                cout<<"Invalid Directory/File_name!!\n";
-                nextFlag=0;
+    if(flags.size()>0){
+        if(find(flags.begin(),flags.end(),"-al")!=flags.end() || find(flags.begin(),flags.end(),"-la")!=flags.end()){
+            if(dirPath.size()==0)
+                iterateDocs(".",1,1);
+            else{
+                for(int i=0;i<dirPath.size();i++){
+                    path = string(currDir) + "/" + dirPath[i];
+                    string str = dirPath[i] + "\n";
+                    if(dirPath.size()>1) write(1,str.c_str(),str.size());
+                    write(1,dirPath[i].c_str(),dirPath[i].size());
+                    iterateDocs(path,1,1);
+                }
+            }
+        }else if(find(flags.begin(),flags.end(),"-l")!=flags.end() && find(flags.begin(),flags.end(),"-a")!=flags.end()){
+              if(dirPath.size()==0)
+                iterateDocs(".",1,1);
+            else if(dirPath.size()==1){
+                path = string(currDir) + "/" + dirPath[0];
+                iterateDocs(path,1,1);
+            }
+            else{
+                for(int i=0;i<dirPath.size();i++){
+                    path = string(currDir) + "/" + dirPath[i];
+                    string str = dirPath[i] + "\n";
+                    write(1,str.c_str(),str.size());
+                    iterateDocs(path,0,1);
+                }
+            }
+        }else if(find(flags.begin(),flags.end(),"-l")!=flags.end() || find(flags.begin(),flags.end(),"-a")!=flags.end()){
+            int flag1,flag2;
+            flag1=flag2=0;
+            if(find(flags.begin(),flags.end(),"-l")!=flags.end())   flag2=1;
+            else flag1=1;
+             if(dirPath.size()==0)
+                iterateDocs(".",flag1,flag2);
+            else if(dirPath.size()==1){
+                path = string(currDir) + "/" + dirPath[0];
+                iterateDocs(path,flag1,flag2);
+            }
+            else{
+                for(int i=0;i<dirPath.size();i++){
+                    path = string(currDir) + "/" + dirPath[i];
+                    string str = dirPath[i] + "\n";
+                    write(1,str.c_str(),str.size());
+                    iterateDocs(path,0,1);
+                }
             }
         }
-    }else if(flags.size()==2){
-        if((flags[0]=="-l" && flags[0]=="-a") || (flags[0]=="-a" && flags[0]=="-l"))
-            iterateDocs(".",1,1);
     }else{
-        cout<<"Too many arguments!!\n";
-        nextFlag=0;
+        if(dirPath.size()==0)
+            iterateDocs(".",0,0);
+        else{
+            for(int i=0;i<dirPath.size();i++){
+                path = string(currDir) + "/" + dirPath[0];
+                string str = dirPath[i] + "\n";
+                if(dirPath.size()>1)    write(1,str.c_str(),str.size());
+                iterateDocs(path,0,0);
+            
+            }
+        }
     }
+
+    if(!tokens.empty() && tokens.front()!=";") 
+        tokens.pop();
     
 }

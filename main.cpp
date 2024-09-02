@@ -71,7 +71,9 @@ int main(int argc,char* argv[]){
     while(status){
 
         if(cmdToks.empty()){
-            if(nextFlag)    write(1,"\n",1);
+            if(nextFlag){
+                write(1,"\n",1);
+            }
             nextFlag = 1;
             if(printFlag)  write(1,outResult.c_str(),outResult.size());
             printFlag=1;
@@ -86,6 +88,9 @@ int main(int argc,char* argv[]){
         // }
 
         if(cmdToks.empty()) continue;
+
+        if(cmdToks.front()==";")
+            cmdToks.pop();
         
         if(cmdToks.front()=="exit" || cmdToks.front()=="4"){
             ofstream history(histPath);
@@ -141,18 +146,18 @@ int main(int argc,char* argv[]){
             searchItem(cmdToks,curDirPath);
         }else if(cmdToks.front() == "ls"){
             cout<<"\n";
+            nextFlag=0;
             listContents(cmdToks,homeDir);
+            continue;
         }else if(cmdToks.front() == "history"){
             historyList(cmdToks,hisVec);
-        }else if(cmdToks.front()!= "cd" && cmdToks.front()!= "ls" && cmdToks.front()!= "echo" && cmdToks.front()!= "pwd" && cmdToks.front()!= "search"){
-            // write(1,cmdToks.front().c_str(),cmdToks.front().size());
-            string err1 = "Invalid input!!";
-            while(!cmdToks.empty() && cmdToks.front()!=";")
-                cmdToks.pop();
-            if(!cmdToks.empty())    cmdToks.pop();
-            // write(1,err1.c_str(),err1.size());
-            cout<<"\n"<<err1;
-        }
+        }//else{
+        //     string err1 = "\nInvalid input!!";
+        //     if(!cmdToks.empty() && cmdToks.front()==";")
+        //         cmdToks.pop();
+        //     if(!cmdToks.empty())    cmdToks.pop();
+        //     write(1,err1.c_str(),err1.size());
+        // }
     }
     return 0;
 }
