@@ -26,6 +26,8 @@ int printFlag =1;
 #include "processInfo.cpp"
 #include "search.cpp"
 #include "listContents.cpp"
+#include "fg_bgProcess.cpp"
+
 
 int main(int argc,char* argv[]){
     char sysName[1026];
@@ -82,10 +84,6 @@ int main(int argc,char* argv[]){
             strcpy(tempChar,input);
             cmdToks = CreTokens(input);
         }
-        // while(!cmdToks.empty()){
-        //     cout<<"\n"<<cmdToks.front();
-        //     cmdToks.pop();
-        // }
 
         if(cmdToks.empty()) continue;
 
@@ -101,6 +99,13 @@ int main(int argc,char* argv[]){
             break;
         }
 
+//added IO
+        if(inResult.find("&") != string::npos){
+                fg_bg(cmdToks,1);
+        }else if(inResult.find(">") != string::npos || inResult.find(">>") != string::npos){
+            
+        }
+//
         if(cmdToks.front()=="cd"){
             string strDir = homeDir;
             string dirPath = changeDir(cmdToks,curDirPath,strDir);
@@ -151,7 +156,10 @@ int main(int argc,char* argv[]){
             continue;
         }else if(cmdToks.front() == "history"){
             historyList(cmdToks,hisVec);
-        }//else{
+        }else{
+            fg_bg(cmdToks,0);
+        }
+        //else{
         //     string err1 = "\nInvalid input!!";
         //     if(!cmdToks.empty() && cmdToks.front()==";")
         //         cmdToks.pop();

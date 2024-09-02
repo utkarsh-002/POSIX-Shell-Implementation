@@ -5,19 +5,6 @@
 
 using namespace std;
 extern int nextFlag;
-// bool errorHandler(queue<string>& tokens){
-//     bool flag;
-//     if(!tokens.empty() && tokens.front()==";"){
-//         tokens.pop();
-//         flag = true;
-//     }
-//     else if(!tokens.empty()){
-//         string err = "\nTo many arguments!!";
-//         write(1,err.c_str(),err.size());
-//         flag = false;
-//     }
-//     return flag;
-// }
 
 string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
     // string sout = "enter path:";
@@ -26,7 +13,7 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
     struct dirent* dirStruct;
     string temp;
     cmdTokens.pop();
-    while(!cmdTokens.empty() && cmdTokens.front()!=";"){
+    while(!cmdTokens.empty() && cmdTokens.front()!=";" && cmdTokens.front()!=">>" && cmdTokens.front()!=">" && cmdTokens.front()!="<"){
         temp = cmdTokens.front();
         cmdTokens.pop();
         if(temp=="."){
@@ -77,6 +64,7 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
             
         }
     }
-    cmdTokens.pop();
+    if(!cmdTokens.empty() && cmdTokens.front()==";")
+            cmdTokens.pop();
     return curDirPath;
 }

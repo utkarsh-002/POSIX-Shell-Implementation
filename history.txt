@@ -1,6 +1,3 @@
-mkdir backup
-mv data.txt backup/
-cp config.conf backup/
 rm old_log.txt
 find . -name "*.sh"
 grep "error" logfile.log
@@ -16,5 +13,8 @@ tail -n 10 filename.txt
 chmod +x script.sh
 echo "Hello, World!" > hello.txt
 tar -cvf backup.tar backup/
+ls
+exit
+open exam.txt &
 ls
 exit
