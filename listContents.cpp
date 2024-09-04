@@ -5,11 +5,6 @@
 #include <pwd.h>
 #include <grp.h>
 #include <unistd.h>
-// #include <vector>
-// #include <string>
-// #include <cstring>
-// #include <ctime>
-// #include <iomanip>
 #include<bits/stdc++.h>
 
 using namespace std;
@@ -23,26 +18,62 @@ void listDetails(const string name,const struct stat detail) {
     char timebuf[80];
     strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", time);
 
-    cout << ((S_ISDIR(detail.st_mode)) ? "d" : "-");
-    cout << ((detail.st_mode & S_IRUSR) ? "r" : "-");
-    cout << ((detail.st_mode & S_IWUSR) ? "w" : "-");
-    cout << ((detail.st_mode & S_IXUSR) ? "x" : "-");
-    cout << ((detail.st_mode & S_IRGRP) ? "r" : "-");
-    cout << ((detail.st_mode & S_IWGRP) ? "w" : "-");
-    cout << ((detail.st_mode & S_IXGRP) ? "x" : "-");
-    cout << ((detail.st_mode & S_IROTH) ? "r" : "-");
-    cout << ((detail.st_mode & S_IWOTH) ? "w" : "-");
-    cout << ((detail.st_mode & S_IXOTH) ? "x" : "-");
-    cout << " " << setw(3) << detail.st_nlink;
+    // cout <<"\n"<<((S_ISDIR(detail.st_mode)) ? "d" : "-");
+    // cout << ((detail.st_mode & S_IRUSR) ? "r" : "-");
+    // cout << ((detail.st_mode & S_IWUSR) ? "w" : "-");
+    // cout << ((detail.st_mode & S_IXUSR) ? "x" : "-");
+    // cout << ((detail.st_mode & S_IRGRP) ? "r" : "-");
+    // cout << ((detail.st_mode & S_IWGRP) ? "w" : "-");
+    // cout << ((detail.st_mode & S_IXGRP) ? "x" : "-");
+    // cout << ((detail.st_mode & S_IROTH) ? "r" : "-");
+    // cout << ((detail.st_mode & S_IWOTH) ? "w" : "-");
+    // cout << ((detail.st_mode & S_IXOTH) ? "x" : "-");
+    // cout << " " << setw(3) << detail.st_nlink;
+    // cout << " " << setw(8) << (pwd ? pwd->pw_name : "");
+    // cout << " " << setw(8) << (grp ? grp->gr_name : "");
+    // cout << " " << setw(8) << detail.st_size;
+    // cout << " " << timebuf;
+    // cout << " " << name;
 
-    cout << " " << setw(8) << (pwd ? pwd->pw_name : "");
-    cout << " " << setw(8) << (grp ? grp->gr_name : "");
+     char buffer[256];
+    int len = 0;
 
-    cout << " " << setw(8) << detail.st_size;
+    //permissions
+    char permissions[11];
+    permissions[0] = (S_ISDIR(detail.st_mode)) ? 'd' : '-';
+    permissions[1] = (detail.st_mode & S_IRUSR) ? 'r' : '-';
+    permissions[2] = (detail.st_mode & S_IWUSR) ? 'w' : '-';
+    permissions[3] = (detail.st_mode & S_IXUSR) ? 'x' : '-';
+    permissions[4] = (detail.st_mode & S_IRGRP) ? 'r' : '-';
+    permissions[5] = (detail.st_mode & S_IWGRP) ? 'w' : '-';
+    permissions[6] = (detail.st_mode & S_IXGRP) ? 'x' : '-';
+    permissions[7] = (detail.st_mode & S_IROTH) ? 'r' : '-';
+    permissions[8] = (detail.st_mode & S_IWOTH) ? 'w' : '-';
+    permissions[9] = (detail.st_mode & S_IXOTH) ? 'x' : '-';
+    permissions[10] = '\0';
 
-    cout << " " << timebuf;
+    write(1,"\n",1);
+    write(STDOUT_FILENO, permissions, strlen(permissions));
 
-    cout << " " << name << endl;
+    len = snprintf(buffer, sizeof(buffer), " %3hu", detail.st_nlink);
+    write(STDOUT_FILENO, buffer, len);
+
+    const char* ownerName = (pwd && pwd->pw_name) ? pwd->pw_name : "";
+    len = snprintf(buffer, sizeof(buffer), " %8s", ownerName);
+    write(STDOUT_FILENO, buffer, len);
+
+    const char* groupName = (grp && grp->gr_name) ? grp->gr_name : "";
+    len = snprintf(buffer, sizeof(buffer), " %8s", groupName);
+    write(STDOUT_FILENO, buffer, len);
+
+    len = snprintf(buffer, sizeof(buffer), " %8lld", static_cast<long long>(detail.st_size));
+    write(STDOUT_FILENO, buffer, len);
+
+    len = snprintf(buffer, sizeof(buffer), " %s", timebuf);
+    write(STDOUT_FILENO, buffer, len);
+
+    len = snprintf(buffer, sizeof(buffer), " %s", name.c_str());
+    write(STDOUT_FILENO, buffer, len);
 }
 
 void iterateDocs(string path,int shwHidden,int shwDetail){
@@ -52,13 +83,13 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
         return;
     }
 
-    struct dirent *entry;
-    while ((entry = readdir(dptr)) != nullptr) {
+    struct dirent *entPtr;
+    while ((entPtr = readdir(dptr)) != nullptr) {
 
-        if (!shwHidden && entry->d_name[0] == '.') 
+        if (!shwHidden && entPtr->d_name[0] == '.') 
             continue;
 
-        string fullPath = path + "/" + entry->d_name;
+        string fullPath = path + "/" + entPtr->d_name;
         struct stat fileDetail;
         if (stat(fullPath.c_str(), &fileDetail) < 0) {
             perror("stat");
@@ -66,9 +97,10 @@ void iterateDocs(string path,int shwHidden,int shwDetail){
         }
 
         if (shwDetail) {
-            listDetails(entry->d_name, fileDetail);
+            listDetails(entPtr->d_name, fileDetail);
         } else {
-            cout << entry->d_name << "\n";
+            write(1,"\n",1);
+            write(1,entPtr->d_name,strlen(entPtr->d_name));
         }
     }
     closedir(dptr);
@@ -78,9 +110,10 @@ void listContents(queue<string>& tokens,string homeDir){
     vector<string> flags;
     vector<string> dirPath;
     string tempStr,path;
-    tokens.pop();
     char currDir[PATH_MAX];
     getcwd(currDir,sizeof(currDir));
+
+    tokens.pop();
     
     while(!tokens.empty() && tokens.front()!=";"){
         if(tokens.front().find("-")!=string::npos){
@@ -148,7 +181,6 @@ void listContents(queue<string>& tokens,string homeDir){
                 string str = dirPath[i] + "\n";
                 if(dirPath.size()>1)    write(1,str.c_str(),str.size());
                 iterateDocs(path,0,0);
-            
             }
         }
     }

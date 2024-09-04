@@ -15,12 +15,11 @@ void getProcessInfo(queue<string>& tokens){
     while(!tokens.empty() && tokens.front()!=";"){
         cnt++;
         try {
-            int pid = stoi(tokens.front());
+            pid = stoi(tokens.front());
         } catch (const invalid_argument& err) {
-        perror("Error");
-        return;
-    } 
-        pid = stoi(tokens.front());
+            perror("Error");
+            return;
+        } 
         tokens.pop();
     }
     
@@ -33,10 +32,10 @@ void getProcessInfo(queue<string>& tokens){
 
     tokens.pop();
     char exePath[PROC_PIDPATHINFO_MAXSIZE];
-    string pidStr = "pid -- " + to_string(pid);
-    string statusStr = "Process Status -- ";
-    string memStr = "memory -- ";
-    string exeStr = "Executable Path -- ";
+    string pidStr = "pid - " + to_string(pid);
+    string statusStr = "Process Status - ";
+    string memStr = "memory - ";
+    string exeStr = "Executable Path - ";
 
     int mib[4];
     struct kinfo_proc kp;
@@ -99,14 +98,13 @@ void getProcessInfo(queue<string>& tokens){
     } else {
         exeStr+=exePath;
     }
-
-    // write(1,pidStr.c_str(),pidStr.size());
-    // write(1, "\n", 1);
-    // write(1,statusStr.c_str(),statusStr.size());
-    // write(1, "\n", 1);
-    // write(1,memStr.c_str(),memStr.size());
-    // write(1, "\n", 1);
-    // write(1,exeStr.c_str(),exeStr.size());
-    // write(1, "\n", 1);
-    cout<<"\n"<<pidStr<<"\n"<<statusStr<<"\n"<<memStr<<"\n"<<exeStr<<"\n";
+    // cout<<"\n"<<pidStr<<"\n"<<statusStr<<"\n"<<memStr<<"\n"<<exeStr;
+    write(1, "\n", 1); 
+    write(1, pidStr.c_str(), pidStr.size()); 
+    write(1, "\n", 1); 
+    write(1, statusStr.c_str(), statusStr.size());
+    write(1, "\n", 1);
+    write(1, memStr.c_str(), memStr.size());
+    write(1, "\n", 1);
+    write(1, exeStr.c_str(), exeStr.size());
 }

@@ -6,22 +6,26 @@
 
 using namespace std;
 
+unsigned int sleep(unsigned int seconds);
 extern int nextFlag;
 void fgExecute(vector<char*> argv) {
 
-    int childPid = fork();
+    pid_t childPid = fork();
     
     if(childPid==0){
         if (execvp(argv[0], argv.data()) == -1){
             perror("\nexecvp");
             nextFlag=0;
         }
+        exit(0);
     }else if(childPid>0){
         int status;
-        int res = waitpid(childPid, &status, WUNTRACED);
-        if(res==-1){
-                perror("\nwaitpid failed");
-            }
+        int res = waitpid(childPid, &status, 0);
+        if(res <0){
+            perror("wait");
+            nextFlag=0;
+        }
+        wait(NULL);
     }
     else
     {

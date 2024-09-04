@@ -20,8 +20,8 @@ string changeDir(queue<string>& cmdTokens,string curDirPath,string homeDir){
             cmdTokens.pop();
             return curDirPath;
         }
-        if(temp == ".."){
-            if(chdir("..")<0){
+        if(temp == ".." || temp.find("..")!=string::npos){
+            if(chdir(temp.c_str())<0){
                 perror("\ncd");
                 nextFlag=0;
             }else{

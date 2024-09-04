@@ -12,7 +12,7 @@ vector<string> files;
 vector<string> matches;
 extern int upIdx;
 extern vector<string> hisVec;
-extern string inResult;
+extern string inResult,histPath;
 extern int inputLen,nextFlag;
 extern void upArrow(vector<string> history,int& inputLen,int& upIdx,string& inResult,string outResult);
 
@@ -53,7 +53,7 @@ void termInput(string outResult) {
         if (string(dirStruct->d_name) == "." || string(dirStruct->d_name) == "..")
             continue;
         if(find(files.begin(),files.end(),string(dirStruct->d_name))==files.end())
-            files.push_back(dirStruct->d_name);
+            files.push_back(string(dirStruct->d_name));
     }
     closedir(dptr);
 
@@ -76,10 +76,17 @@ void termInput(string outResult) {
                 inResult.pop_back();
             inLen--;
             continue;
+        }else if(c==4){
+            ofstream history(histPath);
+            for(int i=0;i<hisVec.size();i++){
+                history<<hisVec[i]<<"\n";
+            }
+            history.close();
+            _exit(0);
         }
 
         //Implement up arrow for history
-        if(c==27){
+        else if(c==27){
             esc = !esc;
             continue;
         }else if(c=='['){
@@ -90,14 +97,13 @@ void termInput(string outResult) {
             inLen=inputLen;
             esc=brace=0;
             continue;
-        }
+        }else if(c=='B' && esc==1 && brace==1)  continue;
 
         //auto complete
         if(c =='\t'){
             matches.clear();
             autoComplete(temp);
             if(matches.size()==1){
-                // write(1,"\r",1);
                 write(1,clr.c_str(),clr.size());
                 write(1,outResult.c_str(),outResult.size());
                 inResult+=matches[0];
@@ -107,11 +113,10 @@ void termInput(string outResult) {
                 write(1,"\n",1);
                 for(int i=0;i<matches.size();i++){
                     write(1,&matches[i],matches[i].length());
-                    write(1,"\t",1);
+                    write(1," ",1);
                 }
                 write(1,":",1);
                 char n[10];
-                // read(0,n,strlen(n));
                 cin.get(n,10);
                 write(1,n,strlen(n));
                 if(atoi(n)<matches.size()){

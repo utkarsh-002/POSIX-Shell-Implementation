@@ -11,10 +11,6 @@ void upArrow(vector<string> history,int& inputLen,int& upIdx,string& inResult,st
     int strLen = inputLen;
     string clr = "\033[2K\033[0G";
     if(upIdx !=0){
-        // while(strLen>0){
-        //     write(1,"\b \b",3);
-        //     strLen--;
-        // }
 
         //delete whole line and move pointer to beginning
         write(1,clr.c_str(),clr.size());
@@ -50,11 +46,18 @@ void historyList(queue<string>& tokens,vector<string> hisVec){
 
     int numHistory = hisVec.size();
     if(num>0)
-        for(int i = (numHistory-num-1)> 0 ? numHistory-num-1 : 0;i<numHistory;i++)
-            cout<<"\n"<<hisVec[i];
+        for(int i = (numHistory-num-1)> 0 ? (numHistory-num-1) : 0;i < numHistory; i++){
+            if(hisVec[i]!="\n"){
+                write(1,"\n",1);
+                write(1,hisVec[i].c_str(),hisVec[i].size());
+            } 
+        }
     else{
-        for(int i = (numHistory-10)> 0 ? numHistory-10 : 0;i<numHistory;i++)
-            cout<<"\n"<<hisVec[i];
+        for(int i = (numHistory-10)> 0 ? (numHistory-10) : 0;i < numHistory; i++){
+            if(hisVec[i]!="\n")
+                write(1,"\n",1);
+                write(1,hisVec[i].c_str(),hisVec[i].size());
+        }
     }
 
 }

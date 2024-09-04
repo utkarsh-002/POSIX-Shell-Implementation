@@ -1,20 +1,20 @@
-rm old_log.txt
-find . -name "*.sh"
-grep "error" logfile.log
-wc -l < data.csv
-cat notes.txt
-du -h
-date
+ls
+search creTokens.cpp
 pwd
-curl -O https://example.com/file.txt
-top
-head -n 10 filename.txt
-tail -n 10 filename.txt
-chmod +x script.sh
-echo "Hello, World!" > hello.txt
-tar -cvf backup.tar backup/
+hsitory
+history
+pinfo
+search changeDir.cpp
+history -9
+history -9
+history
+history
+history -5
 ls
-exit
-open exam.txt &
 ls
-exit
+ls -l
+ls -l
+ls -al main.dSYM
+echo happy   in mu luf   " happt    in   "   ik
+echo happy   in mu luf   " happt    in"    ik
+cd main.dSYM

@@ -68,20 +68,10 @@ void searchItem(queue<string>& tokens,string currDirPath){
             chdir(currDirPath.c_str());
             return;
         }
-        // cout<<"\n"<<dir.front()<<"\n";
+
     }
 
     closedir(dptr);
-    // while((dirStruct = readdir(dptr))!=nullptr){
-    //     if (string(dirStruct->d_name) == "." || string(dirStruct->d_name) == "..")
-    //         continue;
-    //     if(string(dirStruct->d_name)==name){
-    //         cout<<"\nTrue\n";
-    //         return;
-    //     }else{
-    //         if(dirStruct->d_type == DT_DIR)
-    //             dir.push(dirStruct->d_name);
-    //     }
-    // }
+   
     write(1,"\nFalse",6);
 }

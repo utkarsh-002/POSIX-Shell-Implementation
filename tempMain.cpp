@@ -1,43 +1,12 @@
-#include <iostream>
-#include <bits/stdc++.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <limits.h>
+#include "header.h"
 
 using namespace std;
 
-#define inSize 1024
-bool status = 1;
-stack<string> fileList;
-vector<string> echoStr;
-vector<string> hisVec;
-int upIdx,inputLen;
-queue<string> cmdToks;
-int nextFlag=0;
-int printFlag =1;
-char input[inSize], tempChar[inSize], homeDir[PATH_MAX], sysName[1026];
-string curDirPath="~";
-string prevDir="~";
-string outResult, dirPath, strDir, absPath, prompt, histPath, inResult;
-
-#include "creTokens.cpp"
-#include "printHistory.cpp"
-#include "termInput.cpp"
-#include "changeDir.cpp"
-#include "echo.cpp"
-#include "getCurrDirPath.cpp"
-#include "processInfo.cpp"
-#include "search.cpp"
-#include "listContents.cpp"
-#include "fg_bgProcess.cpp"
-
 void chooseCmds(){
     if(cmdToks.front()=="cd"){
+            nextFlag=0;
             strDir = homeDir;
             dirPath = changeDir(cmdToks,curDirPath,strDir);
-            
-            // if(curDirPath==dirPath) 
-            //     continue;
 
             if(dirPath == "Home"){
                 write(1,"\n",1);
@@ -67,19 +36,22 @@ void chooseCmds(){
             string echoRes = echoFun(cmdToks,tempChar);
             write(1,"\n",1);
             write(1,echoRes.c_str(),echoRes.size());
+            nextFlag=0;
         }else if(cmdToks.front() == "pwd"){
             getPwd(cmdToks,curDirPath);
+            nextFlag=0;
         }else if(cmdToks.front() == "pinfo"){
             getProcessInfo(cmdToks);
+            nextFlag=0;
         }else if(cmdToks.front() == "search"){
             searchItem(cmdToks,curDirPath);
-        }else if(cmdToks.front() == "ls"){
-            cout<<"\n";
             nextFlag=0;
+        }else if(cmdToks.front() == "ls"){
             listContents(cmdToks,homeDir);
-            // continue;
+            nextFlag=0;
         }else if(cmdToks.front() == "history"){
             historyList(cmdToks,hisVec);
+            nextFlag=0;
         }
 }
 
@@ -146,19 +118,20 @@ int main(int argc,char* argv[]){
             history.close();
             break;
         }
-
-//added IO
-        // if(inResult.find("&") != string::npos){
-        //         fg_bg(cmdToks,1);
-        // }else if(inResult.find(">") != string::npos || inResult.find(">>") != string::npos){
-            
-        // }
-
-//
         chooseCmds();
-        // else{
-        //     fg_bg(cmdToks,0);
-        // }
+// added IO
+        if(inResult.find("&") != string::npos){
+                fg_bg(cmdToks,1);
+        }else if(inResult.find(">") != string::npos || inResult.find(">>") != string::npos || inResult.find("<") != string::npos){
+            IORedir(cmdToks);
+        }else if(inResult.find("|") != string::npos){
+            write(1,"\n",1);
+            pipe(cmdToks);
+        }
+        else{
+            write(1,"\n",1);
+            fg_bg(cmdToks,0);
+        }
     }
     return 0;
 }
