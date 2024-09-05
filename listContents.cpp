@@ -18,24 +18,7 @@ void listDetails(const string name,const struct stat detail) {
     char timebuf[80];
     strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", time);
 
-    // cout <<"\n"<<((S_ISDIR(detail.st_mode)) ? "d" : "-");
-    // cout << ((detail.st_mode & S_IRUSR) ? "r" : "-");
-    // cout << ((detail.st_mode & S_IWUSR) ? "w" : "-");
-    // cout << ((detail.st_mode & S_IXUSR) ? "x" : "-");
-    // cout << ((detail.st_mode & S_IRGRP) ? "r" : "-");
-    // cout << ((detail.st_mode & S_IWGRP) ? "w" : "-");
-    // cout << ((detail.st_mode & S_IXGRP) ? "x" : "-");
-    // cout << ((detail.st_mode & S_IROTH) ? "r" : "-");
-    // cout << ((detail.st_mode & S_IWOTH) ? "w" : "-");
-    // cout << ((detail.st_mode & S_IXOTH) ? "x" : "-");
-    // cout << " " << setw(3) << detail.st_nlink;
-    // cout << " " << setw(8) << (pwd ? pwd->pw_name : "");
-    // cout << " " << setw(8) << (grp ? grp->gr_name : "");
-    // cout << " " << setw(8) << detail.st_size;
-    // cout << " " << timebuf;
-    // cout << " " << name;
-
-     char buffer[256];
+    char buffer[256];
     int len = 0;
 
     //permissions
@@ -79,7 +62,8 @@ void listDetails(const string name,const struct stat detail) {
 void iterateDocs(string path,int shwHidden,int shwDetail){
     DIR *dptr = opendir(path.c_str());
     if (dptr == nullptr) {
-        perror("opendir");
+        perror("\nopendir");
+        nextFlag=0;
         return;
     }
 

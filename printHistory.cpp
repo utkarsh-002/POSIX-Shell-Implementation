@@ -8,7 +8,6 @@ using namespace std;
 int hisIdx;
 
 void upArrow(vector<string> history,int& inputLen,int& upIdx,string& inResult,string outResult){
-    int strLen = inputLen;
     string clr = "\033[2K\033[0G";
     if(upIdx !=0){
 

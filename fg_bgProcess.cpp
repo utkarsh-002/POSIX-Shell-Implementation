@@ -7,7 +7,7 @@
 using namespace std;
 
 unsigned int sleep(unsigned int seconds);
-extern int nextFlag;
+extern int nextFlag,frdPid;
 void fgExecute(vector<char*> argv) {
 
     pid_t childPid = fork();
@@ -17,15 +17,15 @@ void fgExecute(vector<char*> argv) {
             perror("\nexecvp");
             nextFlag=0;
         }
-        exit(0);
     }else if(childPid>0){
         int status;
-        int res = waitpid(childPid, &status, 0);
+        frdPid = childPid;
+        int res = waitpid(childPid, &status, 2);
         if(res <0){
             perror("wait");
             nextFlag=0;
         }
-        wait(NULL);
+        
     }
     else
     {
@@ -44,7 +44,8 @@ void bgExecute(vector<char*> argv) {
             nextFlag=0;
         }
     }else if(childPid>0){
-        cout<<"\n";
+        frdPid = childPid;
+        write(1,"\n",1);
         string pid = to_string(childPid);
         write(1,pid.c_str(),pid.size());
     }

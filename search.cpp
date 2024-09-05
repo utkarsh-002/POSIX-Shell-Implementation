@@ -25,7 +25,6 @@ bool searchFun(DIR* dptr,string name,int cnt){
 }
 
 void searchItem(queue<string>& tokens,string currDirPath){
-    struct dirent* dirStruct;
     DIR* dptr;
     tokens.pop();
     string name;

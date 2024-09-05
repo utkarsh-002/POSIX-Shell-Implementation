@@ -1,20 +1,20 @@
-ls
-search creTokens.cpp
-pwd
-hsitory
-history
-pinfo
-search changeDir.cpp
-history -9
-history -9
-history
-history
-history -5
-ls
-ls
-ls -l
-ls -l
-ls -al main.dSYM
-echo happy   in mu luf   " happt    in   "   ik
-echo happy   in mu luf   " happt    in"    ik
+sleep 300
+echo heelo;heelo
 cd main.dSYM
+sleep 300
+pinfo 6062A
+pinfo 6062A
+pinfo 6062
+pinfo 6062
+pinfo
+pwd
+pwd
+echo erroro   rroro;"rururu;ututht"
+pinfo
+sleep 300
+sleep 300
+sleep 300 &
+pinfo 46086
+ls change
+ls header.h
+pinfo

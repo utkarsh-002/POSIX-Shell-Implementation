@@ -26,18 +26,15 @@ string echoFun(queue<string>& tokens,char* input){
             continue;
         }
 
-        // while(i<strlen(input) && input[i] != '"'){
-        //     if(input[i] == ' ' && res.back() == ' ' && evencnt)    continue;
-        //     res+=input[i];
-        //     i++;
-        // }
-
         if (input[i] == ' ' && (res.empty() || res.back() == ' ') && evencnt) {
             i++;
             continue;
         }
-
-        res += input[i];
+        
+        if(input[i] == ';' && evencnt)
+            res +="\n";
+        else
+            res += input[i];
         i++;
     }
     

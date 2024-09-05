@@ -1,62 +1,96 @@
-#include <iostream>
-#include <bits/stdc++.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <limits.h>
+#include "header.h"
+#include "files.h"
 
 using namespace std;
 
-#define inSize 1024
-bool status = 1;
-string inResult;
-stack<string> fileList;
-vector<string> echoStr;
-vector<string> hisVec;
-string histPath;
-int upIdx,inputLen;
-int nextFlag=0;
-int printFlag =1;
+void chooseCmds(){
+    if(cmdToks.front()=="cd"){
+            strDir = homeDir;
+            dirPath = changeDir(cmdToks,curDirPath,strDir);
 
-#include "creTokens.cpp"
-#include "printHistory.cpp"
-#include "termInput.cpp"
-#include "changeDir.cpp"
-#include "echo.cpp"
-#include "getCurrDirPath.cpp"
-#include "processInfo.cpp"
-#include "search.cpp"
-#include "listContents.cpp"
-#include "fg_bgProcess.cpp"
+            if(dirPath == "Home"){
+                write(1,"\n",1);
+                write(1,absPath.c_str(),absPath.size());
+                printFlag = 0;
 
+            }else if(dirPath== "prev" ){
+                string str = prevDir;
+                str.erase(str.find('~'),1);
+                strDir = strDir + str;
+                if(chdir(strDir.c_str())<0)
+                    perror("cd");
+                else{
+                    string tempStr = curDirPath;
+                    curDirPath = prevDir;
+                    prevDir = tempStr;
+                    outResult=prompt + curDirPath +">";
+                }
+            }else if(curDirPath!=dirPath){
+                prevDir = curDirPath;
+                curDirPath = dirPath;
+                outResult= prompt +  curDirPath +">";
+            }
+        }
+        
+        else if(cmdToks.front() == "echo"){
+            string echoRes = echoFun(cmdToks,tempChar);
+            write(1,"\n",1);
+            write(1,echoRes.c_str(),echoRes.size());
+            while(!cmdToks.empty())
+                cmdToks.pop();
+        }else if(cmdToks.front() == "pwd"){
+            getPwd(cmdToks,curDirPath);
+        }else if(cmdToks.front() == "pinfo"){
+            getProcessInfo(cmdToks);
+            nextFlag=0;
+        }else if(cmdToks.front() == "search"){
+            searchItem(cmdToks,curDirPath);
+        }else if(cmdToks.front() == "ls"){
+            listContents(cmdToks,homeDir);
+            nextFlag=0;
+        }else if(cmdToks.front() == "history"){
+            historyList(cmdToks,hisVec);
+            nextFlag=0;
+        }else{
+            write(1,"\n",1);
+            fg_bg(cmdToks,0);
+        }
+}
+
+void hdleSigtstp(int sig) {
+        kill(frdPid, SIGTSTP); 
+        int stdin = tcgetpgrp(STDIN_FILENO);
+        tcsetpgrp(STDIN_FILENO, getpgrp());
+}
+
+
+void hdleSigint(int sig) {
+        kill(frdPid, SIGINT); 
+}
 
 int main(int argc,char* argv[]){
-    char sysName[1026];
+
+    signal(SIGINT, hdleSigint); 
+    signal(SIGTSTP, hdleSigtstp);    
     gethostname(sysName, sizeof(sysName));
 
     uid_t uid = getuid();
     struct passwd *userDetail = getpwuid(uid);
 
     char *dotLocal = strstr(sysName, ".local");
-    char homeDir[PATH_MAX];
     getcwd(homeDir,sizeof(homeDir));
 
     if(dotLocal)
         *dotLocal = '\0';
 
-    queue<string> cmdToks;
-    char input[inSize];
-    char tempChar[inSize];
-    string prompt = userDetail->pw_name;
+    prompt = userDetail->pw_name;
     prompt+="@";
     prompt+=sysName;
     prompt+=":";
     
-    string curDirPath="~";
-    string prevDir="~";
-    string outResult = prompt+curDirPath+">";
-    string absPath = prompt +  homeDir +">";
-    // nextFlag=0;
-    // printFlag=1;
+    
+    outResult = prompt+curDirPath+">";
+    absPath = prompt +  homeDir +">";
 
     histPath = string(homeDir) + "/history.txt";
     ifstream history(histPath);
@@ -98,74 +132,19 @@ int main(int argc,char* argv[]){
             history.close();
             break;
         }
-
-//added IO
+        
+// added IO
         if(inResult.find("&") != string::npos){
                 fg_bg(cmdToks,1);
-        }else if(inResult.find(">") != string::npos || inResult.find(">>") != string::npos){
-            
-        }
-//
-        if(cmdToks.front()=="cd"){
-            string strDir = homeDir;
-            string dirPath = changeDir(cmdToks,curDirPath,strDir);
-            
-            if(curDirPath==dirPath) continue;
-
-            if(dirPath == "Home"){
-                write(1,"\n",1);
-                write(1,absPath.c_str(),absPath.size());
-                printFlag = 0;
-                nextFlag=0;
-            }else if(dirPath=="prev"){
-                string str = prevDir;
-                str.erase(str.find('~'),1);
-                strDir = strDir + str;
-                // write(1,strDir.c_str(),strDir.size());
-                if(chdir(strDir.c_str())<0)
-                    perror("cd");
-                else{
-                    string tempStr = curDirPath;
-                    curDirPath = prevDir;
-                    prevDir = tempStr;
-                    outResult=prompt + curDirPath +">";
-                }
-            }else if(curDirPath!=dirPath){
-                prevDir = curDirPath;
-                // write(1,dirPath.c_str(),dirPath.size());
-                curDirPath = dirPath;
-                outResult= prompt +  curDirPath +">";
-            }
-        }
-        
-        else if(cmdToks.front() == "echo"){
-            // write(1,tempChar,strlen(tempChar));
-            string echoRes = echoFun(cmdToks,tempChar);
+        }else if(inResult.find(">") != string::npos || inResult.find(">>") != string::npos || inResult.find("<") != string::npos){
+            IORedir(cmdToks);
+        }else if(inResult.find("|") != string::npos){
             write(1,"\n",1);
-            write(1,echoRes.c_str(),echoRes.size());
-        }else if(cmdToks.front() == "pwd"){
-            getPwd(cmdToks,curDirPath);
-        }else if(cmdToks.front() == "pinfo"){
-            getProcessInfo(cmdToks);
-        }else if(cmdToks.front() == "search"){
-            searchItem(cmdToks,curDirPath);
-        }else if(cmdToks.front() == "ls"){
-            cout<<"\n";
+            pipe(cmdToks);
             nextFlag=0;
-            listContents(cmdToks,homeDir);
-            continue;
-        }else if(cmdToks.front() == "history"){
-            historyList(cmdToks,hisVec);
-        }else{
-            fg_bg(cmdToks,0);
-        }
-        //else{
-        //     string err1 = "\nInvalid input!!";
-        //     if(!cmdToks.empty() && cmdToks.front()==";")
-        //         cmdToks.pop();
-        //     if(!cmdToks.empty())    cmdToks.pop();
-        //     write(1,err1.c_str(),err1.size());
-        // }
+        }else
+            chooseCmds();           
+
     }
     return 0;
 }
